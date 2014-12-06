@@ -4,9 +4,6 @@ PRODUCT_RELEASE_NAME := Nexus7
 # Inherit AOSP device configuration
 $(call inherit-product, device/asus/deb/full_deb.mk)
 
-# Inherit common product files.
-$(call inherit-product, vendor/eos/config/common.mk)
-
 # Inherit tablet config.
 $(call inherit-product, vendor/eos/config/common_full_tablet_wifionly.mk)
 
