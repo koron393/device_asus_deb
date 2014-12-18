@@ -1,0 +1,75 @@
+
+project build/
+diff --git a/build/core/combo/arch/arm/armv7-a-neon.mk b/build/core/combo/arch/arm/armv7-a-neon.mk
+index 4c25e22..37f7f86 100644
+--- a/build/core/combo/arch/arm/armv7-a-neon.mk
++++ b/build/core/combo/arch/arm/armv7-a-neon.mk
+@@ -6,7 +6,7 @@ ARCH_ARM_HAVE_VFP               := true
+ ARCH_ARM_HAVE_VFP_D32           := true
+ ARCH_ARM_HAVE_NEON              := true
+ 
+-ifneq (,$(filter cortex-a15 denver,$(TARGET_$(combo_2nd_arch_prefix)CPU_VARIANT)))
++ifneq (,$(filter cortex-a15 krait denver,$(TARGET_$(combo_2nd_arch_prefix)CPU_VARIANT)))
+ 	arch_variant_cflags := -mcpu=cortex-a15
+ else
+ ifeq ($(strip $(TARGET_$(combo_2nd_arch_prefix)CPU_VARIANT)),cortex-a9)
+diff --git a/build/core/config.mk b/build/core/config.mk
+index b28d928..38900d7 100644
+--- a/build/core/config.mk
++++ b/build/core/config.mk
+@@ -451,9 +451,9 @@ HOST_JDK_TOOLS_JAR:= $(shell $(BUILD_SYSTEM)/find-jdk-tools-jar.sh)
+ endif
+ 
+ ifneq ($(HOST_JDK_TOOLS_JAR),)
+-ifeq ($(wildcard $(HOST_JDK_TOOLS_JAR)),)
+-$(error Error: could not find jdk tools.jar, please check if your JDK was installed correctly)
+-endif
++#ifeq ($(wildcard $(HOST_JDK_TOOLS_JAR)),)
++#$(error Error: could not find jdk tools.jar, please check if your JDK was installed correctly)
++#endif
+ endif
+ 
+ # Is the host JDK 64-bit version?
+diff --git a/build/core/main.mk b/build/core/main.mk
+index e3dcd44..06b9840 100644
+--- a/build/core/main.mk
++++ b/build/core/main.mk
+@@ -174,7 +174,8 @@ endif
+ requires_openjdk := false
+ ifeq ($(LEGACY_USE_JAVA6),)
+ ifeq ($(HOST_OS), linux)
+-requires_openjdk := true
++#requires_openjdk := true
++requires_openjdk := false
+ endif
+ endif
+ 
+diff --git a/build/core/tasks/kernel.mk b/build/core/tasks/kernel.mk
+index 829bf2e..48d829a 100644
+--- a/build/core/tasks/kernel.mk
++++ b/build/core/tasks/kernel.mk
+@@ -121,7 +121,7 @@ define mv-modules
+     if [ "$$mdpath" != "" ];then\
+         mpath=`dirname $$mdpath`;\
+         ko=`find $$mpath/kernel -type f -name *.ko`;\
+-        for i in $$ko; do $(ARM_EABI_TOOLCHAIN)/arm-eabi-strip --strip-unneeded $$i;\
++        for i in $$ko; do $(ARM_EABI_TOOLCHAIN)/arm-linux-androideabi-strip --strip-unneeded $$i;\
+         mv $$i $(KERNEL_MODULES_OUT)/; done;\
+     fi
+ endef
+@@ -153,12 +153,12 @@ ifeq ($(TARGET_ARCH),arm)
+     endif
+     ifneq ($(TARGET_KERNEL_CUSTOM_TOOLCHAIN),)
+         ifeq ($(HOST_OS),darwin)
+-            ARM_CROSS_COMPILE:=CROSS_COMPILE="$(ccache) $(ANDROID_BUILD_TOP)/prebuilts/gcc/darwin-x86/arm/$(TARGET_KERNEL_CUSTOM_TOOLCHAIN)/bin/arm-eabi-"
++            ARM_CROSS_COMPILE:=CROSS_COMPILE="$(ccache) $(ANDROID_BUILD_TOP)/prebuilts/gcc/darwin-x86/arm/$(TARGET_KERNEL_CUSTOM_TOOLCHAIN)/bin/arm-linux-androideabi-"
+         else
+-            ARM_CROSS_COMPILE:=CROSS_COMPILE="$(ccache) $(ANDROID_BUILD_TOP)/prebuilts/gcc/linux-x86/arm/$(TARGET_KERNEL_CUSTOM_TOOLCHAIN)/bin/arm-eabi-"
++            ARM_CROSS_COMPILE:=CROSS_COMPILE="$(ccache) $(ANDROID_BUILD_TOP)/prebuilts/gcc/linux-x86/arm/$(TARGET_KERNEL_CUSTOM_TOOLCHAIN)/bin/arm-linux-androideabi-"
+         endif
+     else
+-        ARM_CROSS_COMPILE:=CROSS_COMPILE="$(ccache) $(ARM_EABI_TOOLCHAIN)/arm-eabi-"
++        ARM_CROSS_COMPILE:=CROSS_COMPILE="$(ccache) $(ARM_EABI_TOOLCHAIN)/arm-linux-androideabi-"
+     endif
+     ccache = 
+ endif
