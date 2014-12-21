@@ -14,7 +14,7 @@ index 4c25e22..37f7f86 100644
  else
  ifeq ($(strip $(TARGET_$(combo_2nd_arch_prefix)CPU_VARIANT)),cortex-a9)
 diff --git a/build/core/config.mk b/build/core/config.mk
-index b28d928..38900d7 100644
+index 3e6abed..b132f70 100644
 --- a/build/core/config.mk
 +++ b/build/core/config.mk
 @@ -451,9 +451,9 @@ HOST_JDK_TOOLS_JAR:= $(shell $(BUILD_SYSTEM)/find-jdk-tools-jar.sh)
