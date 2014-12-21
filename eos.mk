@@ -25,8 +25,16 @@ TARGET_SELINUX_CONFIG := flo_defconfig
 TARGET_KERNEL_CUSTOM_TOOLCHAIN := arm-linux-androideabi-4.9
 
 #Set build fingerprint / ID / Product Name ect.
-PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME=razorg BUILD_FINGERPRINT=google/razorg/deb:4.4.3/KTU84L/1148727:user/release-keys PRIVATE_BUILD_DESC="razorg-user 4.4.3 KTU84L 1148727 release-keys"
+PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME=razorg BUILD_FINGERPRINT=google/razorg/deb:5.0.2/LRX22G/1537103:user/release-keys PRIVATE_BUILD_DESC="razorg-user 5.0.2 LRX22G 1537103 release-keys"
 #PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME="razor" BUILD_FINGERPRINT="google/razor/flo:5.0/LRX21T/1576899:user/release-keys" PRIVATE_BUILD_DESC="razor-user 5.0 LRX21T 1576899 release-keys"
+
+# TouchControl package.
+PRODUCT_PACKAGES += \
+    TouchControl
+
+# Dialer package.
+PRODUCT_PACKAGES += \
+    Dialer
 
 # Copy device specific prebuilt files.
 PRODUCT_COPY_FILES += \
