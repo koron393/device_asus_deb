@@ -1,6 +1,8 @@
 [
  {
-   "repository": "android_device_asus_flo",
-   "target_path": "device/asus/flo"
+   "remote":      "koron393",
+   "repository":  "device_asus_flo",
+   "target_path": "device/asus/flo",
+   "revision":    "bs-lp5.0"
  }
 ]
