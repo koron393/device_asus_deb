@@ -25,4 +25,6 @@ PRODUCT_MANUFACTURER := asus
 PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME=razorg BUILD_FINGERPRINT=google/razorg/deb:5.0.2/LRX22G/1537103:user/release-keys PRIVATE_BUILD_DESC="razorg-user 5.0.2 LRX22G 1537103 release-keys"
 
 PRODUCT_PACKAGES += \
-    Dialer
+    Dialer \
+    Superuser \
+    su
