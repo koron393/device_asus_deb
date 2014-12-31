@@ -32,3 +32,10 @@ PRODUCT_PACKAGES += \
 # Koush's Superuser
 SUPERUSER_EMBEDDED := true
 SUPERUSER_PACKAGE_PREFIX := com.android.settings.cyanogenmod.superuser
+
+BOARD_SEPOLICY_DIRS += \
+    device/asus/deb/sepolicy
+
+BOARD_SEPOLICY_UNION += \
+    file_contexts \
+    su.te
