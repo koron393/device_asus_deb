@@ -28,3 +28,7 @@ PRODUCT_PACKAGES += \
     Dialer \
     Superuser \
     su
+
+# Koush's Superuser
+SUPERUSER_EMBEDDED := true
+SUPERUSER_PACKAGE_PREFIX := com.android.settings.cyanogenmod.superuser
