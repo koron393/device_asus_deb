@@ -1,0 +1,137 @@
+
+project build/
+diff --git a/build/core/combo/arch/arm/armv7-a-neon.mk b/build/core/combo/arch/arm/armv7-a-neon.mk
+index 4c25e22..37f7f86 100644
+--- a/build/core/combo/arch/arm/armv7-a-neon.mk
++++ b/build/core/combo/arch/arm/armv7-a-neon.mk
+@@ -6,7 +6,7 @@ ARCH_ARM_HAVE_VFP               := true
+ ARCH_ARM_HAVE_VFP_D32           := true
+ ARCH_ARM_HAVE_NEON              := true
+ 
+-ifneq (,$(filter cortex-a15 denver,$(TARGET_$(combo_2nd_arch_prefix)CPU_VARIANT)))
++ifneq (,$(filter cortex-a15 krait denver,$(TARGET_$(combo_2nd_arch_prefix)CPU_VARIANT)))
+ 	arch_variant_cflags := -mcpu=cortex-a15
+ else
+ ifeq ($(strip $(TARGET_$(combo_2nd_arch_prefix)CPU_VARIANT)),cortex-a9)
+diff --git a/build/core/config.mk b/build/core/config.mk
+index 794c5ac..f4ee03d 100644
+--- a/build/core/config.mk
++++ b/build/core/config.mk
+@@ -455,9 +455,9 @@ HOST_JDK_TOOLS_JAR:= $(shell $(BUILD_SYSTEM)/find-jdk-tools-jar.sh)
+ endif
+ 
+ ifneq ($(HOST_JDK_TOOLS_JAR),)
+-ifeq ($(wildcard $(HOST_JDK_TOOLS_JAR)),)
+-$(error Error: could not find jdk tools.jar, please check if your JDK was installed correctly)
+-endif
++#ifeq ($(wildcard $(HOST_JDK_TOOLS_JAR)),)
++#$(error Error: could not find jdk tools.jar, please check if your JDK was installed correctly)
++#endif
+ endif
+ 
+ # Is the host JDK 64-bit version?
+diff --git a/build/core/main.mk b/build/core/main.mk
+index dca7d60..b0773ee 100644
+--- a/build/core/main.mk
++++ b/build/core/main.mk
+@@ -178,7 +178,8 @@ endif
+ requires_openjdk := false
+ ifeq ($(LEGACY_USE_JAVA6),)
+ ifeq ($(HOST_OS), linux)
+-requires_openjdk := true
++#requires_openjdk := true
++requires_openjdk := false
+ endif
+ endif
+ 
+diff --git a/build/tools/releasetools/edify_generator.py b/build/tools/releasetools/edify_generator.py
+index 3574fc7..904fd22 100644
+--- a/build/tools/releasetools/edify_generator.py
++++ b/build/tools/releasetools/edify_generator.py
+@@ -230,6 +230,10 @@ class EdifyGenerator(object):
+                           p.device, p.mount_point, mount_dict.get(p.fs_type, "")))
+       self.mounts.add(p.mount_point)
+ 
++  def Mountb(self, mount_point):
++    self.script.append('run_program("/sbin/busybox", "mount", "%s");' % (mount_point))
++    self.mounts.add(mount_point)
++
+   def Unmount(self, mount_point):
+     """Unmount the partiiton with the given mount_point."""
+     if mount_point in self.mounts:
+diff --git a/build/tools/releasetools/ota_from_target_files b/build/tools/releasetools/ota_from_target_files
+index 103fe1f..552239b 100755
+--- a/build/tools/releasetools/ota_from_target_files
++++ b/build/tools/releasetools/ota_from_target_files
+@@ -573,7 +573,7 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
+                      ""+input_zip.read("SYSTEM/bin/backuptool.sh"))
+       common.ZipWriteStr(output_zip, "system/bin/backuptool.functions",
+                      ""+input_zip.read("SYSTEM/bin/backuptool.functions"))
+-    script.Mount("/system")
++    script.Mountb("/system")
+     script.RunBackup("backup")
+     script.Unmount("/system")
+ 
+@@ -591,7 +591,7 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
+   script.AppendExtra("if is_mounted(\"/data\") then")
+   script.ValidateSignatures("data")
+   script.AppendExtra("else")
+-  script.Mount("/data")
++  script.Mountb("/data")
+   script.ValidateSignatures("data")
+   script.Unmount("/data")
+   script.AppendExtra("endif;")
+@@ -679,7 +679,7 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
+   common.ZipWriteStr(output_zip, "boot.img", boot_img.data)
+ 
+   if block_based:
+-    script.Mount("/system")
++    script.Mountb("/system")
+   script.ValidateSignatures("cleanup")
+   if block_based:
+     script.Unmount("/system")
+@@ -689,19 +689,19 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
+   if OPTIONS.backuptool:
+     script.ShowProgress(0.02, 10)
+     if block_based:
+-      script.Mount("/system")
++      script.Mountb("/system")
+     script.RunBackup("restore")
+     if block_based:
+       script.Unmount("/system")
+ 
+-  if block_based:
+-    script.Print("Flashing SuperSU...")
+-    common.ZipWriteStr(output_zip, "supersu/supersu.zip",
+-                   ""+input_zip.read("SYSTEM/addon.d/UPDATE-SuperSU.zip"))
+-    script.Mount("/system")
+-    script.FlashSuperSU()
+-  if block_based:
+-    script.Unmount("/system")
++#  if block_based:
++#    script.Print("Flashing SuperSU...")
++#    common.ZipWriteStr(output_zip, "supersu/supersu.zip",
++#                   ""+input_zip.read("SYSTEM/addon.d/UPDATE-SuperSU.zip"))
++#    script.Mountb("/system")
++#    script.FlashSuperSU()
++#  if block_based:
++#    script.Unmount("/system")
+ 
+   script.ShowProgress(0.05, 5)
+   script.WriteRawImage("/boot", "boot.img")
+@@ -1468,13 +1468,13 @@ endif;
+   if OPTIONS.verify and system_diff:
+     script.Print("Remounting and verifying system partition files...")
+     script.Unmount("/system")
+-    script.Mount("/system")
++    script.Mountb("/system")
+     system_diff.EmitExplicitTargetVerification(script)
+ 
+   if OPTIONS.verify and vendor_diff:
+     script.Print("Remounting and verifying vendor partition files...")
+     script.Unmount("/vendor")
+-    script.Mount("/vendor")
++    script.Mountb("/vendor")
+     vendor_diff.EmitExplicitTargetVerification(script)
+   script.AddToZip(target_zip, output_zip, input_path=OPTIONS.updater_binary)
+ 
