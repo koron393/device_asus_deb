@@ -39,3 +39,6 @@ BOARD_SEPOLICY_DIRS += \
 BOARD_SEPOLICY_UNION += \
     file_contexts \
     su.te
+
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.sys.root_access=3
