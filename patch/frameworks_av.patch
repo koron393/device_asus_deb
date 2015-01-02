@@ -1,0 +1,568 @@
+
+project frameworks/av/
+diff --git a/frameworks/av/media/libeffects/downmix/EffectDownmix.c b/frameworks/av/media/libeffects/downmix/EffectDownmix.c
+index 6686f27..a8d570f 100644
+--- a/frameworks/av/media/libeffects/downmix/EffectDownmix.c
++++ b/frameworks/av/media/libeffects/downmix/EffectDownmix.c
+@@ -401,7 +401,8 @@ static int Downmix_Command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdS
+         memcpy(pReplyData, pCmdData, sizeof(effect_param_t) + sizeof(int32_t));
+         ALOGV("Downmix_Command EFFECT_CMD_GET_PARAM param %" PRId32 ", replySize %" PRIu32,
+                 *(int32_t *)rep->data, rep->vsize);
+-        rep->status = Downmix_getParameter(pDownmixer, *(int32_t *)rep->data, &rep->vsize,
++        int32_t rep_data; memcpy(&rep_data, rep->data, sizeof(int32_t));
++        rep->status = Downmix_getParameter(pDownmixer, rep_data /* *(int32_t *)rep->data */, &rep->vsize,
+                 rep->data + sizeof(int32_t));
+         *replySize = sizeof(effect_param_t) + sizeof(int32_t) + rep->vsize;
+         break;
+@@ -414,7 +415,8 @@ static int Downmix_Command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdS
+             return -EINVAL;
+         }
+         effect_param_t *cmd = (effect_param_t *) pCmdData;
+-        *(int *)pReplyData = Downmix_setParameter(pDownmixer, *(int32_t *)cmd->data,
++        int32_t cmd_data; memcpy(&cmd_data, cmd->data, sizeof(int32_t));
++        *(int *)pReplyData = Downmix_setParameter(pDownmixer, cmd_data /* *(int32_t *)cmd->data*/,
+                 cmd->vsize, cmd->data + sizeof(int32_t));
+         break;
+ 
+@@ -616,7 +618,7 @@ int Downmix_Configure(downmix_module_t *pDwmModule, effect_config_t *pConfig, bo
+     }
+ 
+     if (&pDwmModule->config != pConfig) {
+-        memcpy(&pDwmModule->config, pConfig, sizeof(effect_config_t));
++        memmove(&pDwmModule->config, pConfig, sizeof(effect_config_t));
+     }
+ 
+     if (init) {
+diff --git a/frameworks/av/media/libeffects/loudness/Android.mk b/frameworks/av/media/libeffects/loudness/Android.mk
+index edf964e..d2995f0 100644
+--- a/frameworks/av/media/libeffects/loudness/Android.mk
++++ b/frameworks/av/media/libeffects/loudness/Android.mk
+@@ -7,7 +7,7 @@ LOCAL_SRC_FILES:= \
+ 	EffectLoudnessEnhancer.cpp \
+ 	dsp/core/dynamic_range_compression.cpp
+ 
+-LOCAL_CFLAGS+= -O2 -fvisibility=hidden
++LOCAL_CFLAGS+= -O3 -fvisibility=hidden
+ 
+ LOCAL_SHARED_LIBRARIES := \
+ 	libcutils \
+diff --git a/frameworks/av/media/libeffects/loudness/EffectLoudnessEnhancer.cpp b/frameworks/av/media/libeffects/loudness/EffectLoudnessEnhancer.cpp
+index 3c2b320..0436d8a 100644
+--- a/frameworks/av/media/libeffects/loudness/EffectLoudnessEnhancer.cpp
++++ b/frameworks/av/media/libeffects/loudness/EffectLoudnessEnhancer.cpp
+@@ -313,6 +313,14 @@ int LE_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
+     LoudnessEnhancerContext * pContext = (LoudnessEnhancerContext *)self;
+     int retsize;
+ 
++    union {
++        void * replyData;
++        int32_t * replyData32;
++        int * iReplyData; //in case ints are 16 bits... as the various violations for pReplyData seemed to
++                          //  intentionally differentiate *(int *)pReplyData from *(int32_t *)pReplyData
++    };
++    replyData = pReplyData;
++
+     if (pContext == NULL || pContext->mState == LOUDNESS_ENHANCER_STATE_UNINITIALIZED) {
+         return -EINVAL;
+     }
+@@ -323,14 +331,14 @@ int LE_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
+         if (pReplyData == NULL || *replySize != sizeof(int)) {
+             return -EINVAL;
+         }
+-        *(int *) pReplyData = LE_init(pContext);
++        iReplyData[0] = LE_init(pContext);
+         break;
+     case EFFECT_CMD_SET_CONFIG:
+         if (pCmdData == NULL || cmdSize != sizeof(effect_config_t)
+                 || pReplyData == NULL || *replySize != sizeof(int)) {
+             return -EINVAL;
+         }
+-        *(int *) pReplyData = LE_setConfig(pContext,
++        iReplyData[0] = LE_setConfig(pContext,
+                 (effect_config_t *) pCmdData);
+         break;
+     case EFFECT_CMD_GET_CONFIG:
+@@ -352,7 +360,7 @@ int LE_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
+         }
+         pContext->mState = LOUDNESS_ENHANCER_STATE_ACTIVE;
+         ALOGV("EFFECT_CMD_ENABLE() OK");
+-        *(int *)pReplyData = 0;
++        iReplyData[0] = 0;
+         break;
+     case EFFECT_CMD_DISABLE:
+         if (pReplyData == NULL || *replySize != sizeof(int)) {
+@@ -363,7 +371,7 @@ int LE_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
+         }
+         pContext->mState = LOUDNESS_ENHANCER_STATE_INITIALIZED;
+         ALOGV("EFFECT_CMD_DISABLE() OK");
+-        *(int *)pReplyData = 0;
++        iReplyData[0] = 0;
+         break;
+     case EFFECT_CMD_GET_PARAM: {
+         if (pCmdData == NULL ||
+@@ -374,16 +382,21 @@ int LE_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
+         }
+         memcpy(pReplyData, pCmdData, sizeof(effect_param_t) + sizeof(uint32_t));
+         effect_param_t *p = (effect_param_t *)pReplyData;
++        union {
++            char *data;
++            uint32_t *data32;
++        };
++        data = p->data;
+         p->status = 0;
+         *replySize = sizeof(effect_param_t) + sizeof(uint32_t);
+         if (p->psize != sizeof(uint32_t)) {
+             p->status = -EINVAL;
+             break;
+         }
+-        switch (*(uint32_t *)p->data) {
++        switch (data32[0]) {
+         case LOUDNESS_ENHANCER_PARAM_TARGET_GAIN_MB:
+             ALOGV("get target gain(mB) = %d", pContext->mTargetGainmB);
+-            *((int32_t *)p->data + 1) = pContext->mTargetGainmB;
++            data32[1] = pContext->mTargetGainmB;
+             p->vsize = sizeof(int32_t);
+             *replySize += sizeof(int32_t);
+             break;
+@@ -397,20 +410,25 @@ int LE_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
+             pReplyData == NULL || *replySize != sizeof(int32_t)) {
+             return -EINVAL;
+         }
+-        *(int32_t *)pReplyData = 0;
++        replyData32[0] = 0;
+         effect_param_t *p = (effect_param_t *)pCmdData;
+         if (p->psize != sizeof(uint32_t) || p->vsize != sizeof(uint32_t)) {
+-            *(int32_t *)pReplyData = -EINVAL;
++            replyData32[0] = -EINVAL;
+             break;
+         }
+-        switch (*(uint32_t *)p->data) {
++        union {
++            char *data;
++            uint32_t *data32;
++        };
++        data = p->data;
++        switch (data32[0]) {
+         case LOUDNESS_ENHANCER_PARAM_TARGET_GAIN_MB:
+-            pContext->mTargetGainmB = *((int32_t *)p->data + 1);
++            pContext->mTargetGainmB = (int32_t)data32[1];
+             ALOGV("set target gain(mB) = %d", pContext->mTargetGainmB);
+             LE_reset(pContext); // apply parameter update
+             break;
+         default:
+-            *(int32_t *)pReplyData = -EINVAL;
++            replyData32[0] = -EINVAL;
+         }
+         } break;
+     case EFFECT_CMD_SET_DEVICE:
+diff --git a/frameworks/av/media/libeffects/visualizer/Android.mk b/frameworks/av/media/libeffects/visualizer/Android.mk
+index c92c543..3a0f3f9 100644
+--- a/frameworks/av/media/libeffects/visualizer/Android.mk
++++ b/frameworks/av/media/libeffects/visualizer/Android.mk
+@@ -6,7 +6,7 @@ include $(CLEAR_VARS)
+ LOCAL_SRC_FILES:= \
+ 	EffectVisualizer.cpp
+ 
+-LOCAL_CFLAGS+= -O2 -fvisibility=hidden
++LOCAL_CFLAGS+= -O3 -fvisibility=hidden
+ 
+ LOCAL_SHARED_LIBRARIES := \
+ 	libcutils \
+diff --git a/frameworks/av/media/libeffects/visualizer/EffectVisualizer.cpp b/frameworks/av/media/libeffects/visualizer/EffectVisualizer.cpp
+index e5089da..97dbfd8 100644
+--- a/frameworks/av/media/libeffects/visualizer/EffectVisualizer.cpp
++++ b/frameworks/av/media/libeffects/visualizer/EffectVisualizer.cpp
+@@ -416,6 +416,14 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
+     VisualizerContext * pContext = (VisualizerContext *)self;
+     int retsize;
+ 
++    union {
++        void * replyData;
++        int32_t * replyData32;
++        int * iReplyData; //in case ints are 16 bits... as the various violations for pReplyData seemed to
++                          //  intentionally differentiate *(int *)pReplyData from *(int32_t *)pReplyData
++    };
++    replyData = pReplyData;
++
+     if (pContext == NULL || pContext->mState == VISUALIZER_STATE_UNINITIALIZED) {
+         return -EINVAL;
+     }
+@@ -427,14 +435,14 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
+         if (pReplyData == NULL || *replySize != sizeof(int)) {
+             return -EINVAL;
+         }
+-        *(int *) pReplyData = Visualizer_init(pContext);
++        iReplyData[0] = Visualizer_init(pContext);
+         break;
+     case EFFECT_CMD_SET_CONFIG:
+         if (pCmdData == NULL || cmdSize != sizeof(effect_config_t)
+                 || pReplyData == NULL || *replySize != sizeof(int)) {
+             return -EINVAL;
+         }
+-        *(int *) pReplyData = Visualizer_setConfig(pContext,
++        iReplyData[0] = Visualizer_setConfig(pContext,
+                 (effect_config_t *) pCmdData);
+         break;
+     case EFFECT_CMD_GET_CONFIG:
+@@ -456,7 +464,7 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
+         }
+         pContext->mState = VISUALIZER_STATE_ACTIVE;
+         ALOGV("EFFECT_CMD_ENABLE() OK");
+-        *(int *)pReplyData = 0;
++        iReplyData[0] = 0;
+         break;
+     case EFFECT_CMD_DISABLE:
+         if (pReplyData == NULL || *replySize != sizeof(int)) {
+@@ -467,7 +475,7 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
+         }
+         pContext->mState = VISUALIZER_STATE_INITIALIZED;
+         ALOGV("EFFECT_CMD_DISABLE() OK");
+-        *(int *)pReplyData = 0;
++        iReplyData[0] = 0;
+         break;
+     case EFFECT_CMD_GET_PARAM: {
+         if (pCmdData == NULL ||
+@@ -478,28 +486,33 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
+         }
+         memcpy(pReplyData, pCmdData, sizeof(effect_param_t) + sizeof(uint32_t));
+         effect_param_t *p = (effect_param_t *)pReplyData;
++        union {
++            char *data;
++            uint32_t *data32;
++        };
++        data = p->data;
+         p->status = 0;
+         *replySize = sizeof(effect_param_t) + sizeof(uint32_t);
+         if (p->psize != sizeof(uint32_t)) {
+             p->status = -EINVAL;
+             break;
+         }
+-        switch (*(uint32_t *)p->data) {
++        switch (data32[0]) {
+         case VISUALIZER_PARAM_CAPTURE_SIZE:
+             ALOGV("get mCaptureSize = %" PRIu32, pContext->mCaptureSize);
+-            *((uint32_t *)p->data + 1) = pContext->mCaptureSize;
++            data32[1] = pContext->mCaptureSize;
+             p->vsize = sizeof(uint32_t);
+             *replySize += sizeof(uint32_t);
+             break;
+         case VISUALIZER_PARAM_SCALING_MODE:
+             ALOGV("get mScalingMode = %" PRIu32, pContext->mScalingMode);
+-            *((uint32_t *)p->data + 1) = pContext->mScalingMode;
++            data32[1] = pContext->mScalingMode;
+             p->vsize = sizeof(uint32_t);
+             *replySize += sizeof(uint32_t);
+             break;
+         case VISUALIZER_PARAM_MEASUREMENT_MODE:
+             ALOGV("get mMeasurementMode = %" PRIu32, pContext->mMeasurementMode);
+-            *((uint32_t *)p->data + 1) = pContext->mMeasurementMode;
++            data32[1] = pContext->mMeasurementMode;
+             p->vsize = sizeof(uint32_t);
+             *replySize += sizeof(uint32_t);
+             break;
+@@ -515,25 +528,30 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
+         }
+         *(int32_t *)pReplyData = 0;
+         effect_param_t *p = (effect_param_t *)pCmdData;
++        union {
++            char *data;
++            uint32_t *data32;
++        };
++        data = p->data;
+         if (p->psize != sizeof(uint32_t) || p->vsize != sizeof(uint32_t)) {
+             *(int32_t *)pReplyData = -EINVAL;
+             break;
+         }
+-        switch (*(uint32_t *)p->data) {
++        switch (data32[0]) {
+         case VISUALIZER_PARAM_CAPTURE_SIZE:
+-            pContext->mCaptureSize = *((uint32_t *)p->data + 1);
++            pContext->mCaptureSize = data32[1];
+             ALOGV("set mCaptureSize = %" PRIu32, pContext->mCaptureSize);
+             break;
+         case VISUALIZER_PARAM_SCALING_MODE:
+-            pContext->mScalingMode = *((uint32_t *)p->data + 1);
++            pContext->mScalingMode = data32[1];
+             ALOGV("set mScalingMode = %" PRIu32, pContext->mScalingMode);
+             break;
+         case VISUALIZER_PARAM_LATENCY:
+-            pContext->mLatency = *((uint32_t *)p->data + 1);
++            pContext->mLatency = data32[1];
+             ALOGV("set mLatency = %" PRIu32, pContext->mLatency);
+             break;
+         case VISUALIZER_PARAM_MEASUREMENT_MODE:
+-            pContext->mMeasurementMode = *((uint32_t *)p->data + 1);
++            pContext->mMeasurementMode = data32[1];
+             ALOGV("set mMeasurementMode = %" PRIu32, pContext->mMeasurementMode);
+             break;
+         default:
+@@ -628,21 +646,20 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
+             }
+         }
+         float rms = nbValidMeasurements == 0 ? 0.0f : sqrtf(sumRmsSquared / nbValidMeasurements);
+-        int32_t* pIntReplyData = (int32_t*)pReplyData;
+         // convert from I16 sample values to mB and write results
+         if (rms < 0.000016f) {
+-            pIntReplyData[MEASUREMENT_IDX_RMS] = -9600; //-96dB
++            replyData32[MEASUREMENT_IDX_RMS] = -9600; //-96dB
+         } else {
+-            pIntReplyData[MEASUREMENT_IDX_RMS] = (int32_t) (2000 * log10(rms / 32767.0f));
++            replyData32[MEASUREMENT_IDX_RMS] = (int32_t) (2000 * log10(rms / 32767.0f));
+         }
+         if (peakU16 == 0) {
+-            pIntReplyData[MEASUREMENT_IDX_PEAK] = -9600; //-96dB
++            replyData32[MEASUREMENT_IDX_PEAK] = -9600; //-96dB
+         } else {
+-            pIntReplyData[MEASUREMENT_IDX_PEAK] = (int32_t) (2000 * log10(peakU16 / 32767.0f));
++            replyData32[MEASUREMENT_IDX_PEAK] = (int32_t) (2000 * log10(peakU16 / 32767.0f));
+         }
+         ALOGV("VISUALIZER_CMD_MEASURE peak=%" PRIu16 " (%" PRId32 "mB), rms=%.1f (%" PRId32 "mB)",
+-                peakU16, pIntReplyData[MEASUREMENT_IDX_PEAK],
+-                rms, pIntReplyData[MEASUREMENT_IDX_RMS]);
++                peakU16, replyData32[MEASUREMENT_IDX_PEAK],
++                rms, replyData32[MEASUREMENT_IDX_RMS]);
+         }
+         break;
+ 
+diff --git a/frameworks/av/media/libmedia/Visualizer.cpp b/frameworks/av/media/libmedia/Visualizer.cpp
+index 5da0b24..99855ee 100644
+--- a/frameworks/av/media/libmedia/Visualizer.cpp
++++ b/frameworks/av/media/libmedia/Visualizer.cpp
+@@ -152,13 +152,18 @@ status_t Visualizer::setCaptureSize(uint32_t size)
+         return INVALID_OPERATION;
+     }
+ 
+-    uint32_t buf32[sizeof(effect_param_t) / sizeof(uint32_t) + 2];
+-    effect_param_t *p = (effect_param_t *)buf32;
++    union {
++        uint32_t buf32[sizeof(effect_param_t) / sizeof(uint32_t) + 2];
++        effect_param_t bufp;
++    };
++    effect_param_t *p = &bufp;
+ 
+     p->psize = sizeof(uint32_t);
+     p->vsize = sizeof(uint32_t);
+-    *(int32_t *)p->data = VISUALIZER_PARAM_CAPTURE_SIZE;
+-    *((int32_t *)p->data + 1)= size;
++    int32_t const vpcs = VISUALIZER_PARAM_CAPTURE_SIZE;
++    memcpy(&(p->data[0]), &vpcs, sizeof(vpcs));
++    memcpy(&(p->data[sizeof(int32_t)]), &size, sizeof(size));
++
+     status_t status = setParameter(p);
+ 
+     ALOGV("setCaptureSize size %d  status %d p->status %d", size, status, p->status);
+@@ -181,13 +186,18 @@ status_t Visualizer::setScalingMode(uint32_t mode) {
+ 
+     Mutex::Autolock _l(mCaptureLock);
+ 
+-    uint32_t buf32[sizeof(effect_param_t) / sizeof(uint32_t) + 2];
+-    effect_param_t *p = (effect_param_t *)buf32;
++    union {
++        uint32_t buf32[sizeof(effect_param_t) / sizeof(uint32_t) + 2];
++        effect_param_t bufp;
++    };
++    effect_param_t *p = &bufp;
+ 
+     p->psize = sizeof(uint32_t);
+     p->vsize = sizeof(uint32_t);
+-    *(int32_t *)p->data = VISUALIZER_PARAM_SCALING_MODE;
+-    *((int32_t *)p->data + 1)= mode;
++
++    int32_t const vpsm = VISUALIZER_PARAM_SCALING_MODE;
++    memcpy(&(p->data[0]), &vpsm, sizeof(vpsm));
++    memcpy(&(p->data[sizeof(int32_t)]), &mode, sizeof(mode));
+     status_t status = setParameter(p);
+ 
+     ALOGV("setScalingMode mode %d  status %d p->status %d", mode, status, p->status);
+@@ -211,13 +221,19 @@ status_t Visualizer::setMeasurementMode(uint32_t mode) {
+ 
+     Mutex::Autolock _l(mCaptureLock);
+ 
+-    uint32_t buf32[sizeof(effect_param_t) / sizeof(uint32_t) + 2];
+-    effect_param_t *p = (effect_param_t *)buf32;
++    union {
++        uint32_t buf32[sizeof(effect_param_t) / sizeof(uint32_t) + 2];
++        effect_param_t bufp;
++    };
++    effect_param_t *p = &bufp;
+ 
+     p->psize = sizeof(uint32_t);
+     p->vsize = sizeof(uint32_t);
+-    *(int32_t *)p->data = VISUALIZER_PARAM_MEASUREMENT_MODE;
+-    *((int32_t *)p->data + 1)= mode;
++    int32_t const vpmm = VISUALIZER_PARAM_MEASUREMENT_MODE;
++    memcpy(&(p->data[0]), &vpmm, sizeof(vpmm));
++    memcpy(&(p->data[sizeof(int32_t)]), &mode, sizeof(mode));
++    //*(int32_t *)p->data = VISUALIZER_PARAM_MEASUREMENT_MODE;
++    //*((int32_t *)p->data + 1)= mode;
+     status_t status = setParameter(p);
+ 
+     ALOGV("setMeasurementMode mode %d  status %d p->status %d", mode, status, p->status);
+@@ -381,12 +397,16 @@ void Visualizer::periodicCapture()
+ 
+ uint32_t Visualizer::initCaptureSize()
+ {
+-    uint32_t buf32[sizeof(effect_param_t) / sizeof(uint32_t) + 2];
+-    effect_param_t *p = (effect_param_t *)buf32;
++    union {
++        uint32_t buf32[sizeof(effect_param_t) / sizeof(uint32_t) + 2];
++        effect_param_t bufp;
++    };
++    effect_param_t *p = &bufp;
+ 
+     p->psize = sizeof(uint32_t);
+     p->vsize = sizeof(uint32_t);
+-    *(int32_t *)p->data = VISUALIZER_PARAM_CAPTURE_SIZE;
++    int32_t const vpcs = VISUALIZER_PARAM_CAPTURE_SIZE;
++    memcpy(&(p->data[0]), &vpcs, sizeof(vpcs));
+     status_t status = getParameter(p);
+ 
+     if (status == NO_ERROR) {
+@@ -395,7 +415,7 @@ uint32_t Visualizer::initCaptureSize()
+ 
+     uint32_t size = 0;
+     if (status == NO_ERROR) {
+-        size = *((int32_t *)p->data + 1);
++        memcpy(&size, &(p->data[sizeof(int32_t)]), sizeof(int32_t));
+     }
+     mCaptureSize = size;
+ 
+diff --git a/frameworks/av/media/libmediaplayerservice/MediaPlayerFactory.cpp b/frameworks/av/media/libmediaplayerservice/MediaPlayerFactory.cpp
+index cdd0e8d..0081232 100644
+--- a/frameworks/av/media/libmediaplayerservice/MediaPlayerFactory.cpp
++++ b/frameworks/av/media/libmediaplayerservice/MediaPlayerFactory.cpp
+@@ -184,12 +184,15 @@ class StagefrightPlayerFactory :
+                                float /*curScore*/) {
+         if (getDefaultPlayerType()
+                 == STAGEFRIGHT_PLAYER) {
+-            char buf[20];
++            union {
++                char buf[20];
++                long bufl[20/sizeof(long)];
++            };
+             lseek(fd, offset, SEEK_SET);
+             read(fd, buf, sizeof(buf));
+             lseek(fd, offset, SEEK_SET);
+ 
+-            uint32_t ident = *((uint32_t*)buf);
++            const long ident = bufl[0];
+ 
+             // Ogg vorbis?
+             if (ident == 0x5367674f) // 'OggS'
+diff --git a/frameworks/av/media/libstagefright/Android.mk b/frameworks/av/media/libstagefright/Android.mk
+index e7ee451..32b722f 100644
+--- a/frameworks/av/media/libstagefright/Android.mk
++++ b/frameworks/av/media/libstagefright/Android.mk
+@@ -174,7 +174,7 @@ LOCAL_SHARED_LIBRARIES += \
+         libstagefright_foundation \
+         libdl
+ 
+-LOCAL_CFLAGS += -Wno-multichar
++LOCAL_CFLAGS += -Wno-multichar -fno-strict-aliasing
+ 
+ ifeq ($(BOARD_USE_SAMSUNG_COLORFORMAT), true)
+ LOCAL_CFLAGS += -DUSE_SAMSUNG_COLORFORMAT
+diff --git a/frameworks/av/media/libstagefright/ExtendedCodec.cpp b/frameworks/av/media/libstagefright/ExtendedCodec.cpp
+index db04abd..d56e422 100644
+--- a/frameworks/av/media/libstagefright/ExtendedCodec.cpp
++++ b/frameworks/av/media/libstagefright/ExtendedCodec.cpp
+@@ -416,6 +416,8 @@ status_t ExtendedCodec::setVideoFormat(
+         *compressionFormat= (OMX_VIDEO_CODINGTYPE)QOMX_VIDEO_CodingDivx;
+     } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_WMV, mime)) {
+         *compressionFormat = OMX_VIDEO_CodingWMV;
++    } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_VC1, mime)){
++        *compressionFormat = OMX_VIDEO_CodingWMV;
+     } else if (!strcasecmp(MEDIA_MIMETYPE_CONTAINER_MPEG2, mime)) {
+         *compressionFormat = OMX_VIDEO_CodingMPEG2;
+     } else {
+@@ -448,6 +450,8 @@ status_t ExtendedCodec::setSupportedRole(
+           "video_decoder.divx", NULL },
+         { MEDIA_MIMETYPE_VIDEO_WMV,
+           "video_decoder.vc1",  NULL },
++        { MEDIA_MIMETYPE_VIDEO_VC1,
++          "video_decoder.vc1",  NULL },
+         { MEDIA_MIMETYPE_AUDIO_AC3,
+           "audio_decoder.ac3", NULL },
+         { MEDIA_MIMETYPE_AUDIO_WMA,
+diff --git a/frameworks/av/media/libstagefright/ExtendedMediaDefs.cpp b/frameworks/av/media/libstagefright/ExtendedMediaDefs.cpp
+index 40df171..de38ebb 100644
+--- a/frameworks/av/media/libstagefright/ExtendedMediaDefs.cpp
++++ b/frameworks/av/media/libstagefright/ExtendedMediaDefs.cpp
+@@ -54,4 +54,11 @@ const char *MEDIA_MIMETYPE_CONTAINER_QCFLV = "video/qc-flv";
+ const char *MEDIA_MIMETYPE_VIDEO_VPX = "video/x-vnd.on2.vp8"; //backward compatibility
+ const char *MEDIA_MIMETYPE_CONTAINER_QTIFLAC = "audio/qti-flac";
+ 
++const char *MEDIA_MIMETYPE_AUDIO_WMA = "audio/x-ms-wma";
++const char *MEDIA_MIMETYPE_VIDEO_WMV = "video/x-ms-wmv";
++const char *MEDIA_MIMETYPE_VIDEO_VC1 = "video/wvc1";
++const char *MEDIA_MIMETYPE_CONTAINER_WMA = "audio/x-ms-wma";
++const char *MEDIA_MIMETYPE_CONTAINER_WMV = "video/x-ms-wmv";
++const char *MEDIA_MIMETYPE_CONTAINER_VC1 = "video/wvc1";
++
+ }  // namespace android
+diff --git a/frameworks/av/media/libstagefright/MediaDefs.cpp b/frameworks/av/media/libstagefright/MediaDefs.cpp
+index 89884a2..89cb0bc 100644
+--- a/frameworks/av/media/libstagefright/MediaDefs.cpp
++++ b/frameworks/av/media/libstagefright/MediaDefs.cpp
+@@ -69,15 +69,12 @@ const char *MEDIA_MIMETYPE_VIDEO_DIVX4 = "video/divx4";
+ const char *MEDIA_MIMETYPE_VIDEO_FLV1 = "video/x-flv";
+ const char *MEDIA_MIMETYPE_VIDEO_MJPEG = "video/x-jpeg";
+ const char *MEDIA_MIMETYPE_VIDEO_RV = "video/vnd.rn-realvideo";
+-const char *MEDIA_MIMETYPE_VIDEO_VC1 = "video/vc1";
+-const char *MEDIA_MIMETYPE_VIDEO_WMV = "video/x-ms-wmv";
+ const char *MEDIA_MIMETYPE_VIDEO_FFMPEG = "video/ffmpeg";
+ 
+ const char *MEDIA_MIMETYPE_AUDIO_APE = "audio/x-ape";
+ const char *MEDIA_MIMETYPE_AUDIO_DTS = "audio/vnd.dts";
+ const char *MEDIA_MIMETYPE_AUDIO_PCM = "audio/x-pcm";
+ const char *MEDIA_MIMETYPE_AUDIO_RA = "audio/vnd.rn-realaudio";
+-const char *MEDIA_MIMETYPE_AUDIO_WMA = "audio/x-ms-wma";
+ const char *MEDIA_MIMETYPE_AUDIO_FFMPEG = "audio/ffmpeg";
+ 
+ const char *MEDIA_MIMETYPE_CONTAINER_APE = "audio/x-ape";
+@@ -93,9 +90,6 @@ const char *MEDIA_MIMETYPE_CONTAINER_RA = "audio/vnd.rn-realaudio";
+ const char *MEDIA_MIMETYPE_CONTAINER_RM = "video/vnd.rn-realvideo";
+ const char *MEDIA_MIMETYPE_CONTAINER_TS = "video/mp2t";
+ const char *MEDIA_MIMETYPE_CONTAINER_WEBM = "video/webm";
+-const char *MEDIA_MIMETYPE_CONTAINER_WMA = "audio/x-ms-wma";
+-const char *MEDIA_MIMETYPE_CONTAINER_WMV = "video/x-ms-wmv";
+-const char *MEDIA_MIMETYPE_CONTAINER_VC1 = "video/vc1";
+ const char *MEDIA_MIMETYPE_CONTAINER_HEVC = "video/hevc";
+ const char *MEDIA_MIMETYPE_CONTAINER_FFMPEG = "video/ffmpeg";
+ 
+diff --git a/frameworks/av/media/libstagefright/OMXCodec.cpp b/frameworks/av/media/libstagefright/OMXCodec.cpp
+index fe38f16..cccb4a9 100644
+--- a/frameworks/av/media/libstagefright/OMXCodec.cpp
++++ b/frameworks/av/media/libstagefright/OMXCodec.cpp
+@@ -4770,7 +4770,6 @@ static const char *colorFormatString(OMX_COLOR_FORMATTYPE type) {
+ static const char *vendorVideoCompressionFormatString(OMX_VIDEO_CODINGTYPE type) {
+     static const char *kVendorNames[] = {
+         "OMX_VIDEO_CodingVendorStartUnused",
+-        "OMX_VIDEO_CodingVC1",
+         "OMX_VIDEO_CodingFLV1",
+         "OMX_VIDEO_CodingDIVX",
+         "OMX_VIDEO_CodingHEVC",
+@@ -4797,7 +4796,6 @@ static const char *videoCompressionFormatString(OMX_VIDEO_CODINGTYPE type) {
+         "OMX_VIDEO_CodingMPEG2",
+         "OMX_VIDEO_CodingH263",
+         "OMX_VIDEO_CodingMPEG4",
+-        "OMX_VIDEO_CodingWMV",
+         "OMX_VIDEO_CodingRV",
+         "OMX_VIDEO_CodingAVC",
+         "OMX_VIDEO_CodingMJPEG",
+diff --git a/frameworks/av/services/audioflinger/Android.mk b/frameworks/av/services/audioflinger/Android.mk
+index 19fd7dd..c11bea9 100644
+--- a/frameworks/av/services/audioflinger/Android.mk
++++ b/frameworks/av/services/audioflinger/Android.mk
+@@ -33,6 +33,11 @@ LOCAL_SRC_FILES:=               \
+ 
+ LOCAL_SRC_FILES += StateQueue.cpp
+ 
++# uncomment for debugging timing problems related to StateQueue::push()
++LOCAL_CFLAGS += -DSTATE_QUEUE_DUMP
++
++LOCAL_CFLAGS += -fno-strict-aliasing
++
+ LOCAL_C_INCLUDES := \
+     $(TOPDIR)frameworks/av/services/audiopolicy \
+     $(call include-path-for, audio-effects) \

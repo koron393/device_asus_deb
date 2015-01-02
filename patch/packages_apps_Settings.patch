@@ -1,10 +1,10 @@
 
 project packages/apps/Settings/
 diff --git a/packages/apps/Settings/Android.mk b/packages/apps/Settings/Android.mk
-index 6ece25a..bbb1f6e 100644
+index 625c950..6a29bff 100644
 --- a/packages/apps/Settings/Android.mk
 +++ b/packages/apps/Settings/Android.mk
-@@ -32,10 +32,20 @@ LOCAL_PRIVILEGED_MODULE := true
+@@ -25,10 +25,20 @@ LOCAL_PRIVILEGED_MODULE := true
  
  LOCAL_PROGUARD_FLAG_FILES := proguard.flags
  
@@ -27,10 +27,10 @@ index 6ece25a..bbb1f6e 100644
  
  # Use the following include to make our test apk.
 diff --git a/packages/apps/Settings/AndroidManifest.xml b/packages/apps/Settings/AndroidManifest.xml
-index c3b0097..74c8bc2 100644
+index 38a9462..995debf 100644
 --- a/packages/apps/Settings/AndroidManifest.xml
 +++ b/packages/apps/Settings/AndroidManifest.xml
-@@ -77,6 +77,30 @@
+@@ -78,6 +78,30 @@
          android:name="cyanogenmod.permission.PROTECTED_APP"
          android:protectionLevel="signatureOrSystem" />
  
@@ -61,7 +61,7 @@ index c3b0097..74c8bc2 100644
      <application android:label="@string/settings_label"
              android:icon="@mipmap/ic_launcher_settings"
              android:taskAffinity=""
-@@ -86,6 +110,47 @@
+@@ -87,6 +111,47 @@
              android:supportsRtl="true"
              android:allowBackup="false">
  
@@ -110,23 +110,23 @@ index c3b0097..74c8bc2 100644
  
          <!-- Screen color Settings Controls -->
 diff --git a/packages/apps/Settings/proguard.flags b/packages/apps/Settings/proguard.flags
-index 7fa9370..3748efd 100644
+index 053abb2..f519730 100644
 --- a/packages/apps/Settings/proguard.flags
 +++ b/packages/apps/Settings/proguard.flags
-@@ -17,6 +17,8 @@
+@@ -16,6 +16,8 @@
+ -keep class com.android.settings.notification.*
  -keep class com.android.settings.slim.**
  -keep class com.android.settings.beanstalk.**
- -keep class com.android.settings.cyanogenmod.MoreDeviceSettings
 +-keep class com.koushikdutta.**
 +-keep class com.android.settings.cyanogenmod.superuser.**
  
  -keep class com.android.settings.cyanogenmod.*Settings
  -keep class com.android.settings.privacyguard.*
 diff --git a/packages/apps/Settings/res/xml/dashboard_categories.xml b/packages/apps/Settings/res/xml/dashboard_categories.xml
-index aba3616..1918a88 100644
+index 4049b43..683454d 100644
 --- a/packages/apps/Settings/res/xml/dashboard_categories.xml
 +++ b/packages/apps/Settings/res/xml/dashboard_categories.xml
-@@ -272,6 +272,14 @@
+@@ -280,6 +280,14 @@
                  android:icon="@drawable/ic_settings_print"
                  />
  
@@ -138,14 +138,14 @@ index aba3616..1918a88 100644
 +                android:icon="@drawable/ic_action_permission"
 +                />
 +
-         <!-- Development -->
+         <!-- Performance -->
          <dashboard-tile
-                 android:id="@+id/development_settings"
+                 android:id="@+id/performance_settings"
 diff --git a/packages/apps/Settings/src/com/android/settings/DevelopmentSettings.java b/packages/apps/Settings/src/com/android/settings/DevelopmentSettings.java
-index ac0391b..d0af648 100644
+index 65dbc84..cae797b 100644
 --- a/packages/apps/Settings/src/com/android/settings/DevelopmentSettings.java
 +++ b/packages/apps/Settings/src/com/android/settings/DevelopmentSettings.java
-@@ -707,6 +707,13 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
+@@ -711,6 +711,13 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
                  .getStringArray(R.array.root_access_entries)[Integer.valueOf(value)]);
      }
  
@@ -160,10 +160,10 @@ index ac0391b..d0af648 100644
          String oldValue = SystemProperties.get(ROOT_ACCESS_PROPERTY, "1");
          SystemProperties.set(ROOT_ACCESS_PROPERTY, newValue.toString());
 diff --git a/packages/apps/Settings/src/com/android/settings/SettingsActivity.java b/packages/apps/Settings/src/com/android/settings/SettingsActivity.java
-index 436755e..39dedda 100644
+index d2f23b2..52d753e 100644
 --- a/packages/apps/Settings/src/com/android/settings/SettingsActivity.java
 +++ b/packages/apps/Settings/src/com/android/settings/SettingsActivity.java
-@@ -1200,6 +1200,10 @@ public class SettingsActivity extends Activity
+@@ -1205,6 +1205,10 @@ public class SettingsActivity extends Activity
                      if (!hasPrintingSupport) {
                          removeTile = true;
                      }

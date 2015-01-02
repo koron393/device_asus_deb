@@ -60,9 +60,18 @@ index 3574fc7..904fd22 100644
      """Unmount the partiiton with the given mount_point."""
      if mount_point in self.mounts:
 diff --git a/build/tools/releasetools/ota_from_target_files b/build/tools/releasetools/ota_from_target_files
-index 103fe1f..552239b 100755
+index 103fe1f..9239ad3 100755
 --- a/build/tools/releasetools/ota_from_target_files
 +++ b/build/tools/releasetools/ota_from_target_files
+@@ -564,7 +564,7 @@ reboot_now("%(bcb_dev)s", "recovery");
+ else if get_stage("%(bcb_dev)s") == "3/3" then
+ """ % bcb_dev)
+ 
+-  script.AppendExtra("ifelse(is_mounted(\"/system\"), unmount(\"/system\"));")
++  #script.AppendExtra("ifelse(is_mounted(\"/system\"), unmount(\"/system\"));")
+   device_specific.FullOTA_InstallBegin()
+ 
+   if OPTIONS.backuptool:
 @@ -573,7 +573,7 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
                       ""+input_zip.read("SYSTEM/bin/backuptool.sh"))
        common.ZipWriteStr(output_zip, "system/bin/backuptool.functions",
@@ -72,15 +81,45 @@ index 103fe1f..552239b 100755
      script.RunBackup("backup")
      script.Unmount("/system")
  
-@@ -591,7 +591,7 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
-   script.AppendExtra("if is_mounted(\"/data\") then")
-   script.ValidateSignatures("data")
-   script.AppendExtra("else")
+@@ -588,13 +588,13 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
+     common.ZipWriteStr(output_zip, "system/bin/otasigcheck.sh",
+                    ""+input_zip.read("SYSTEM/bin/otasigcheck.sh"))
+ 
+-  script.AppendExtra("if is_mounted(\"/data\") then")
+-  script.ValidateSignatures("data")
+-  script.AppendExtra("else")
 -  script.Mount("/data")
++  #script.AppendExtra("if is_mounted(\"/data\") then")
++  #script.ValidateSignatures("data")
++  #script.AppendExtra("else")
 +  script.Mountb("/data")
    script.ValidateSignatures("data")
    script.Unmount("/data")
-   script.AppendExtra("endif;")
+-  script.AppendExtra("endif;")
++  #script.AppendExtra("endif;")
+ 
+   script.Print("**********************************************");
+   script.Print("* ____                       _        _ _    *");
+@@ -606,15 +606,15 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
+   script.Print("**********************************************");
+ 
+   build = GetBuildProp("ro.build.date", OPTIONS.info_dict)
+-  script.Print("******************************************");
+-  script.Print("************  BEANSTALK ROM  *************");
+-  script.Print("******************************************");
++  script.Print("**********************************************");
++  script.Print("**************  BEANSTALK ROM  ***************");
++  script.Print("***********************++************++*******");
+   script.Print("*   Compiled: %s"%(build));
+ 
+   device = GetBuildProp("ro.product.device", OPTIONS.info_dict)
+   model = GetBuildProp("ro.product.model", OPTIONS.info_dict)
+   script.Print("*   Device: %s (%s)"%(model, device));
+-  script.Print("******************************************");
++  script.Print("**********************************************");
+ 
+   if "selinux_fc" in OPTIONS.info_dict:
+     WritePolicyConfig(OPTIONS.info_dict["selinux_fc"], output_zip)
 @@ -679,7 +679,7 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
    common.ZipWriteStr(output_zip, "boot.img", boot_img.data)
  

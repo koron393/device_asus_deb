@@ -1,7 +1,7 @@
 
 project external/koush/Superuser/
 diff --git a/external/koush/Superuser/Superuser/jni/su/su.c b/external/koush/Superuser/Superuser/jni/su/su.c
-index 08d84b9..aa0af39 100644
+index f27d656..46e6e93 100644
 --- a/external/koush/Superuser/Superuser/jni/su/su.c
 +++ b/external/koush/Superuser/Superuser/jni/su/su.c
 @@ -562,7 +562,7 @@ int access_disabled(const struct su_initiator *from) {
