@@ -450,10 +450,21 @@ index cdd0e8d..0081232 100644
              // Ogg vorbis?
              if (ident == 0x5367674f) // 'OggS'
 diff --git a/frameworks/av/media/libstagefright/Android.mk b/frameworks/av/media/libstagefright/Android.mk
-index e7ee451..32b722f 100644
+index e7ee451..46899b5 100644
 --- a/frameworks/av/media/libstagefright/Android.mk
 +++ b/frameworks/av/media/libstagefright/Android.mk
-@@ -174,7 +174,7 @@ LOCAL_SHARED_LIBRARIES += \
+@@ -162,6 +162,10 @@ ifeq ($(TARGET_ENABLE_QC_AV_ENHANCEMENTS),true)
+        LOCAL_SRC_FILES  += FMA2DPWriter.cpp
+ endif #TARGET_ENABLE_AV_ENHANCEMENTS
+ 
++ifeq ($(BOARD_USES_QCOM_AUDIO),true)
++       LOCAL_CFLAGS     += -DBOARD_USES_QCOM_AUDIO
++endif
++
+ ifeq ($(strip $(AUDIO_FEATURE_ENABLED_FLAC_OFFLOAD)),true)
+        LOCAL_CFLAGS     += -DFLAC_OFFLOAD_ENABLED
+ endif
+@@ -174,7 +178,7 @@ LOCAL_SHARED_LIBRARIES += \
          libstagefright_foundation \
          libdl
  
@@ -484,72 +495,60 @@ index db04abd..d56e422 100644
          { MEDIA_MIMETYPE_AUDIO_AC3,
            "audio_decoder.ac3", NULL },
          { MEDIA_MIMETYPE_AUDIO_WMA,
-diff --git a/frameworks/av/media/libstagefright/ExtendedMediaDefs.cpp b/frameworks/av/media/libstagefright/ExtendedMediaDefs.cpp
-index 40df171..de38ebb 100644
---- a/frameworks/av/media/libstagefright/ExtendedMediaDefs.cpp
-+++ b/frameworks/av/media/libstagefright/ExtendedMediaDefs.cpp
-@@ -54,4 +54,11 @@ const char *MEDIA_MIMETYPE_CONTAINER_QCFLV = "video/qc-flv";
- const char *MEDIA_MIMETYPE_VIDEO_VPX = "video/x-vnd.on2.vp8"; //backward compatibility
- const char *MEDIA_MIMETYPE_CONTAINER_QTIFLAC = "audio/qti-flac";
- 
-+const char *MEDIA_MIMETYPE_AUDIO_WMA = "audio/x-ms-wma";
-+const char *MEDIA_MIMETYPE_VIDEO_WMV = "video/x-ms-wmv";
-+const char *MEDIA_MIMETYPE_VIDEO_VC1 = "video/wvc1";
-+const char *MEDIA_MIMETYPE_CONTAINER_WMA = "audio/x-ms-wma";
-+const char *MEDIA_MIMETYPE_CONTAINER_WMV = "video/x-ms-wmv";
-+const char *MEDIA_MIMETYPE_CONTAINER_VC1 = "video/wvc1";
-+
- }  // namespace android
 diff --git a/frameworks/av/media/libstagefright/MediaDefs.cpp b/frameworks/av/media/libstagefright/MediaDefs.cpp
-index 89884a2..89cb0bc 100644
+index 89884a2..9553603 100644
 --- a/frameworks/av/media/libstagefright/MediaDefs.cpp
 +++ b/frameworks/av/media/libstagefright/MediaDefs.cpp
-@@ -69,15 +69,12 @@ const char *MEDIA_MIMETYPE_VIDEO_DIVX4 = "video/divx4";
+@@ -69,7 +69,7 @@ const char *MEDIA_MIMETYPE_VIDEO_DIVX4 = "video/divx4";
  const char *MEDIA_MIMETYPE_VIDEO_FLV1 = "video/x-flv";
  const char *MEDIA_MIMETYPE_VIDEO_MJPEG = "video/x-jpeg";
  const char *MEDIA_MIMETYPE_VIDEO_RV = "video/vnd.rn-realvideo";
 -const char *MEDIA_MIMETYPE_VIDEO_VC1 = "video/vc1";
--const char *MEDIA_MIMETYPE_VIDEO_WMV = "video/x-ms-wmv";
++const char *MEDIA_MIMETYPE_VIDEO_VC1 = "video/wvc1";
+ const char *MEDIA_MIMETYPE_VIDEO_WMV = "video/x-ms-wmv";
  const char *MEDIA_MIMETYPE_VIDEO_FFMPEG = "video/ffmpeg";
  
- const char *MEDIA_MIMETYPE_AUDIO_APE = "audio/x-ape";
- const char *MEDIA_MIMETYPE_AUDIO_DTS = "audio/vnd.dts";
- const char *MEDIA_MIMETYPE_AUDIO_PCM = "audio/x-pcm";
- const char *MEDIA_MIMETYPE_AUDIO_RA = "audio/vnd.rn-realaudio";
--const char *MEDIA_MIMETYPE_AUDIO_WMA = "audio/x-ms-wma";
- const char *MEDIA_MIMETYPE_AUDIO_FFMPEG = "audio/ffmpeg";
- 
- const char *MEDIA_MIMETYPE_CONTAINER_APE = "audio/x-ape";
-@@ -93,9 +90,6 @@ const char *MEDIA_MIMETYPE_CONTAINER_RA = "audio/vnd.rn-realaudio";
- const char *MEDIA_MIMETYPE_CONTAINER_RM = "video/vnd.rn-realvideo";
- const char *MEDIA_MIMETYPE_CONTAINER_TS = "video/mp2t";
+@@ -95,7 +95,7 @@ const char *MEDIA_MIMETYPE_CONTAINER_TS = "video/mp2t";
  const char *MEDIA_MIMETYPE_CONTAINER_WEBM = "video/webm";
--const char *MEDIA_MIMETYPE_CONTAINER_WMA = "audio/x-ms-wma";
--const char *MEDIA_MIMETYPE_CONTAINER_WMV = "video/x-ms-wmv";
+ const char *MEDIA_MIMETYPE_CONTAINER_WMA = "audio/x-ms-wma";
+ const char *MEDIA_MIMETYPE_CONTAINER_WMV = "video/x-ms-wmv";
 -const char *MEDIA_MIMETYPE_CONTAINER_VC1 = "video/vc1";
++const char *MEDIA_MIMETYPE_CONTAINER_VC1 = "video/wvc1";
  const char *MEDIA_MIMETYPE_CONTAINER_HEVC = "video/hevc";
  const char *MEDIA_MIMETYPE_CONTAINER_FFMPEG = "video/ffmpeg";
  
-diff --git a/frameworks/av/media/libstagefright/OMXCodec.cpp b/frameworks/av/media/libstagefright/OMXCodec.cpp
-index fe38f16..cccb4a9 100644
---- a/frameworks/av/media/libstagefright/OMXCodec.cpp
-+++ b/frameworks/av/media/libstagefright/OMXCodec.cpp
-@@ -4770,7 +4770,6 @@ static const char *colorFormatString(OMX_COLOR_FORMATTYPE type) {
- static const char *vendorVideoCompressionFormatString(OMX_VIDEO_CODINGTYPE type) {
-     static const char *kVendorNames[] = {
-         "OMX_VIDEO_CodingVendorStartUnused",
--        "OMX_VIDEO_CodingVC1",
-         "OMX_VIDEO_CodingFLV1",
-         "OMX_VIDEO_CodingDIVX",
-         "OMX_VIDEO_CodingHEVC",
-@@ -4797,7 +4796,6 @@ static const char *videoCompressionFormatString(OMX_VIDEO_CODINGTYPE type) {
-         "OMX_VIDEO_CodingMPEG2",
-         "OMX_VIDEO_CodingH263",
-         "OMX_VIDEO_CodingMPEG4",
--        "OMX_VIDEO_CodingWMV",
-         "OMX_VIDEO_CodingRV",
-         "OMX_VIDEO_CodingAVC",
-         "OMX_VIDEO_CodingMJPEG",
+diff --git a/frameworks/av/media/libstagefright/Utils.cpp b/frameworks/av/media/libstagefright/Utils.cpp
+index 1c68c5f..459a55c 100644
+--- a/frameworks/av/media/libstagefright/Utils.cpp
++++ b/frameworks/av/media/libstagefright/Utils.cpp
+@@ -42,9 +42,11 @@
+ #include "QCMediaDefs.h"
+ #include "QCMetaData.h"
+ #ifndef QCOM_DIRECTTRACK
++#ifdef BOARD_USES_QCOM_AUDIO
+ #include "audio_defs.h"
+ #endif
+ #endif
++#endif
+ 
+ namespace android {
+ 
+@@ -818,6 +820,7 @@ bool canOffloadStream(const sp<MetaData>& meta, bool hasVideo, const sp<MetaData
+         ALOGE(" Couldn't map mime type \"%s\" to a valid AudioSystem::audio_format !", mime);
+         return false;
+ #ifdef ENABLE_AV_ENHANCEMENTS
++#ifdef BOARD_USES_QCOM_AUDIO
+     } else {
+         // Override audio format for PCM offload
+         if (audio_is_linear_pcm(info.format)) {
+@@ -827,6 +830,7 @@ bool canOffloadStream(const sp<MetaData>& meta, bool hasVideo, const sp<MetaData
+                 info.format = AUDIO_FORMAT_PCM_16_BIT_OFFLOAD;
+         }
+ #endif
++#endif
+     }
+ 
+     if (AUDIO_FORMAT_INVALID == info.format) {
 diff --git a/frameworks/av/services/audioflinger/Android.mk b/frameworks/av/services/audioflinger/Android.mk
 index 19fd7dd..c11bea9 100644
 --- a/frameworks/av/services/audioflinger/Android.mk
