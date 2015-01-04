@@ -1,0 +1,8 @@
+[
+ {
+   "remote":      "koron393",
+   "repository":  "device_asus_flo",
+   "target_path": "device/asus/flo",
+   "revision":    "eos-lp-caf"
+ }
+]
