@@ -24,19 +24,6 @@ PRODUCT_MANUFACTURER := asus
 #Set build fingerprint / ID / Product Name ect.
 PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME=razorg BUILD_FINGERPRINT=google/razorg/deb:5.0.2/LRX22G/1537103:user/release-keys PRIVATE_BUILD_DESC="razorg-user 5.0.2 LRX22G 1537103 release-keys"
 
-# TouchControl package.
-#PRODUCT_PACKAGES += \
-#    TouchControl
-
-# Dialer package.
-PRODUCT_PACKAGES += \
-    Dialer
-
-# Screen recorder package and lib
-#PRODUCT_PACKAGES += \
-#    ScreenRecorder \
-#    libscreenrecorder
-
 # Copy device specific prebuilt files.
 PRODUCT_COPY_FILES += \
     vendor/eos/prebuilt/common/bootanimations/BOOTANIMATION-1080x1920.zip:system/media/bootanimation.zip
