@@ -16,19 +16,19 @@
 
 # rild
 PRODUCT_PACKAGES := \
-    rild \
-    BasicSmsReceiver
+        rild \
+        BasicSmsReceiver
 
 PRODUCT_COPY_FILES := \
-    device/asus/deb/fstab.deb:root/fstab.flo \
-    device/asus/deb/init.deb.rc:root/init.flo.rc
+        device/asus/deb/fstab.deb:root/fstab.flo \
+        device/asus/deb/init.deb.rc:root/init.flo.rc
 
 PRODUCT_PACKAGES += \
 	camera.deb
 
 #NFC
 PRODUCT_PACKAGES += \
-    nfc_nci.bcm2079x.default
+        nfc_nci.bcm2079x.default
 
 # Do not power down SIM card when modem is sent to Low Power Mode.
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -40,6 +40,10 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
         rild.libpath=/system/lib/libril-qc-qmi-1.so
+
+# Superuser.
+PRODUCT_PROPERTY_OVERRIDES += \
+        persist.sys.root_access=3
 
 # the actual meat of the device-specific product definition
 $(call inherit-product, device/asus/flo/device-common.mk)
