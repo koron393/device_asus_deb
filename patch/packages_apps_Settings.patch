@@ -1,0 +1,24 @@
+diff --git a/src/com/android/settings/DevelopmentSettings.java b/src/com/android/settings/DevelopmentSettings.java
+index d0f1d0d..120b0c8 100644
+--- a/src/com/android/settings/DevelopmentSettings.java
++++ b/src/com/android/settings/DevelopmentSettings.java
+@@ -454,12 +454,13 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
+ 
+     private boolean removeRootOptionsIfRequired() {
+         // user builds don't get root, and eng always gets root
+-        if (!(Build.IS_DEBUGGABLE || "eng".equals(Build.TYPE))) {
+-            if (mRootAccess != null) {
+-                getPreferenceScreen().removePreference(mRootAccess);
+-                return true;
+-            }
+-        }
++        // --Always show root options--
++        //if (!(Build.IS_DEBUGGABLE || "eng".equals(Build.TYPE))) {
++        //    if (mRootAccess != null) {
++        //        getPreferenceScreen().removePreference(mRootAccess);
++        //        return true;
++        //    }
++        //}
+ 
+         return false;
+     }

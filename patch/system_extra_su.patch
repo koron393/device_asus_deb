@@ -1,0 +1,38 @@
+diff --git a/init.superuser.rc b/init.superuser.rc
+index 0c84201..d662b67 100644
+--- a/init.superuser.rc
++++ b/init.superuser.rc
+@@ -14,3 +14,20 @@ on property:persist.sys.root_access=1
+ 
+ on property:persist.sys.root_access=3
+     start su_daemon
++
++# hide su daemon
++service su_daemon_h /system/bin/.ext/.su --daemon
++    seclabel u:r:sudaemon:s0
++    oneshot
++
++on property:persist.sys.root_access=0
++    stop su_daemon_h
++
++on property:persist.sys.root_access=2
++    stop su_daemon_h
++
++on property:persist.sys.root_access=1
++    start su_daemon_h
++
++on property:persist.sys.root_access=3
++    start su_daemon_h
+diff --git a/su.c b/su.c
+index fed5c3b..48f6f8e 100644
+--- a/su.c
++++ b/su.c
+@@ -295,7 +295,7 @@ int access_disabled(const struct su_initiator *from) {
+         /* only allow su on debuggable builds */
+         if (strcmp("1", debuggable) != 0) {
+             ALOGE("Root access is disabled on non-debug builds");
+-            return 1;
++            return 0;
+         }
+ 
+         data = read_file("/data/property/persist.sys.root_access");

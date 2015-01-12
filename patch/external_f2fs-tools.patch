@@ -1,0 +1,28 @@
+diff --git a/Android.mk b/Android.mk
+index bee1071..4696e62 100644
+--- a/Android.mk
++++ b/Android.mk
+@@ -114,4 +114,23 @@ LOCAL_CFLAGS := $(version_CFLAGS)
+ LOCAL_HOST_SHARED_LIBRARIES :=  libext2_uuid_host
+ include $(BUILD_HOST_EXECUTABLE)
+ 
++#----------------------------------------------------------
++include $(CLEAR_VARS)
++LOCAL_SRC_FILES := tools/f2fstat.c
++LOCAL_MODULE := f2fstat
++LOCAL_MODULE_TAGS := optional
++LOCAL_CFLAGS := $(version_CFLAGS)
++LOCAL_EXPORT_CFLAGS := $(version_CFLAGS)
++LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
++include $(BUILD_EXECUTABLE)
++
++include $(CLEAR_VARS)
++LOCAL_SRC_FILES := tools/fibmap.c
++LOCAL_MODULE := fibmap.f2fs
++LOCAL_MODULE_TAGS := optional
++LOCAL_CFLAGS := $(version_CFLAGS)
++LOCAL_EXPORT_CFLAGS := $(version_CFLAGS)
++LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
++include $(BUILD_EXECUTABLE)
++
+ endif
