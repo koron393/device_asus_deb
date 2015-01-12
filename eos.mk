@@ -11,9 +11,6 @@ $(call inherit-product, vendor/eos/config/common_full_tablet_wifionly.mk)
 # Inherit telephony stuff
 $(call inherit-product, vendor/eos/config/telephony.mk)
 
-# Enhanced NFC
-$(call inherit-product, vendor/eos/config/nfc_enhanced.mk)
-
 # Inherit from hardware-specific part of the product configuration
 $(call inherit-product, device/asus/deb/device.mk)
 
