@@ -26,7 +26,7 @@ PRODUCT_COPY_FILES := \
 PRODUCT_PACKAGES += \
     camera.deb
 
-#NFC
+# NFC
 PRODUCT_PACKAGES += \
     nfc_nci.bcm2079x.default
 
@@ -34,12 +34,27 @@ PRODUCT_PACKAGES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     persist.radio.apm_sim_not_pwdn=1
 
-#Stop rild if non 3G SKU
+# Stop rild if non 3G SKU
 PRODUCT_PACKAGES += \
     init.qcom.class_main.sh
 
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     rild.libpath=/system/lib/libril-qc-qmi-1.so
+
+# Dialer package
+PRODUCT_PACKAGES += \
+    Dialer
+
+# Superuser.
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.sys.root_access=3
+
+# F2FS tools.
+PRODUCT_PACKAGES += \
+    mkfs.f2fs \
+    fsck.f2fs \
+    f2fstat \
+    fibmap.f2fs
 
 # the actual meat of the device-specific product definition
 $(call inherit-product, device/asus/flo/device-common.mk)
