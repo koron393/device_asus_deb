@@ -12,7 +12,7 @@ $(call inherit-product, vendor/eos/config/common_full_tablet_wifionly.mk)
 $(call inherit-product, vendor/eos/config/telephony.mk)
 
 # Inherit from hardware-specific part of the product configuration
-$(call inherit-product, device/asus/deb/device.mk)
+$(call inherit-product, device/asus/deb/full_deb.mk)
 
 ## Device identifier. This must come after all inclusions
 PRODUCT_DEVICE := deb
