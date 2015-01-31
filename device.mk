@@ -21,7 +21,8 @@ PRODUCT_PACKAGES := \
 
 PRODUCT_COPY_FILES := \
         device/asus/deb/fstab.deb:root/fstab.flo \
-        device/asus/deb/init.deb.rc:root/init.flo.rc
+        device/asus/deb/init.deb.rc:root/init.flo.rc \
+        device/asus/deb/99elementalx:system/etc/init.d/99elementalx
 
 PRODUCT_PACKAGES += \
 	camera.deb
