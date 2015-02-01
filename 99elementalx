@@ -1,0 +1,12 @@
+#!/system/bin/sh
+
+echo 4 > /sys/module/msm_fb/parameters/backlight_dimmer
+echo 0 > /sys/android_touch/wake_gestures
+echo 1 > /sys/android_touch/sweep2wake
+echo 1 > /sys/android_touch/doubletap2wake
+echo 1 > /sys/android_touch/pwrkey_suspend
+echo 0 > /sys/android_touch/lid_suspend
+echo 0 > /sys/android_touch/sweep2sleep
+echo 0 > /sys/android_touch/orientation
+echo 1 > /sys/module/lid/parameters/enable_lid
+echo 4200 > /sys/devices/i2c-0/0-006a/float_voltage

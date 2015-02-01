@@ -249,17 +249,6 @@ on post-fs-data
     write /sys/devices/system/cpu/cpu3/online 1
     write /dev/cpuctl/apps/cpu.notify_on_migrate 1
 
-    write /sys/module/msm_fb/parameters/backlight_dimmer 4
-    write /sys/android_touch/wake_gestures 0
-    write /sys/android_touch/sweep2wake 1
-    write /sys/android_touch/doubletap2wake 1
-    write /sys/android_touch/pwrkey_suspend 1
-    write /sys/android_touch/lid_suspend 0
-    write /sys/android_touch/sweep2sleep 0
-    write /sys/android_touch/orientation 0
-    write /sys/module/lid/parameters/enable_lid 1
-    write /sys/devices/i2c-0/0-006a/float_voltage 4200
-
 on charger
     # Enable Power modes and set the CPU Freq Sampling rates
     write /sys/module/rpm_resources/enable_low_power/L2_cache 1
