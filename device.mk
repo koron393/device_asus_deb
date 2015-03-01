@@ -24,6 +24,9 @@ PRODUCT_COPY_FILES := \
     device/asus/deb/init.deb.rc:root/init.flo.rc \
     device/asus/deb/99elementalx:system/etc/init.d/99elementalx
 
+PRODUCT_COPY_FILES += \
+    frameworks/native/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml
+
 PRODUCT_PACKAGES += \
     camera.deb
 
