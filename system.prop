@@ -5,3 +5,6 @@
 ro.telephony.default_network=9
 #Display Traditional Chinese/Simplified Chinese carriers name
 persist.radio.use_cc_names=true
+
+# Ambient Display
+debug.doze.component=1
