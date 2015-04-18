@@ -17,10 +17,6 @@
 
 <resources>
 
-    <!-- URL's -->
-    <string name="gapps_url">http://forum.xda-developers.com/paranoid-android/general/gapps-official-to-date-pa-google-apps-t2943900</string>
-    <string name="gapps_url_kitkat">http://forum.xda-developers.com/paranoid-android/general/gapps-official-to-date-pa-google-apps-t2943900</string>
-
     <!-- Update checker -->
     <string name="xml_url_kitkat">http://www.lares.dti.ne.jp/~koron/android/ota_file.xml</string>
     <string name="notification_message">ROM update available</string>
