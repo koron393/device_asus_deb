@@ -208,3 +208,8 @@
 /system/vendor/lib/libmmstillomx.so
 /system/vendor/lib/liboemcamera.so
 /system/vendor/lib/libqomx_jpegenc.so
+/system/vendor/lib/libWVStreamControlAPI_L1.so
+/system/vendor/lib/libWVphoneAPI.so
+/system/vendor/lib/libwvdrm_L1.so
+/system/vendor/lib/libwvm.so
+/system/vendor/lib/libfrsdk.so

@@ -8,3 +8,7 @@ persist.radio.use_cc_names=true
 
 # Ambient Display
 debug.doze.component=1
+
+# DRM
+persist.sys.media.legacy-drm=false
+persist.sys.media.use-awesome=false
