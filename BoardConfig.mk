@@ -25,7 +25,7 @@ TARGET_RELEASETOOLS_EXTENSIONS := device/asus/deb
 TARGET_RECOVERY_FSTAB = device/asus/deb/fstab.deb
 
 TARGET_USE_03 := false
-TARGET_GCC_VERSION_EXP := 4.8
+TARGET_GCC_VERSION_EXP := 4.9
 
 -include vendor/asus/deb/BoardConfigVendor.mk
 include device/asus/flo/BoardConfigCommon.mk
