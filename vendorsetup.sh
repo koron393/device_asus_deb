@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011 The Android Open-Source Project
+# Copyright (C) 2012 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,21 +14,10 @@
 # limitations under the License.
 #
 
-TARGET_BOOTLOADER_BOARD_NAME := deb
-TARGET_BOOTLOADER_NAME := deb
-TARGET_BOARD_INFO_FILE := device/asus/deb/board-info.txt
+# This file is executed by build/envsetup.sh, and can use anything
+# defined in envsetup.sh.
+#
+# In particular, you can add lunch options with the add_lunch_combo
+# function: add_lunch_combo generic-eng
 
-BOARD_HAL_STATIC_LIBRARIES := libdumpstate.deb
-
-TARGET_RELEASETOOLS_EXTENSIONS := device/asus/deb
-
-TARGET_RECOVERY_FSTAB = device/asus/deb/fstab.deb
-
--include vendor/asus/deb/BoardConfigVendor.mk
-include device/asus/flo/BoardConfigCommon.mk
-
-# GCC
-TARGET_GCC_VERSION_EXP := 4.9
-
-# F2FS
-PRODUCT_COPY_FILES += device/asus/deb/format-system.sh:system/bin/format-system.sh
+add_lunch_combo cm_deb-userdebug

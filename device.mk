@@ -16,22 +16,29 @@
 
 # rild
 PRODUCT_PACKAGES := \
-    rild \
-    BasicSmsReceiver
+	rild \
+	BasicSmsReceiver
 
 PRODUCT_COPY_FILES := \
-    device/asus/deb/fstab.deb:root/fstab.flo \
-    device/asus/deb/init.deb.rc:root/init.flo.rc
+	device/asus/deb/fstab.deb:root/fstab.flo \
+	device/asus/deb/init.deb.rc:root/init.flo.rc \
+	device/asus/deb/99elementalx:system/etc/init.d/99elementalx
 
 PRODUCT_COPY_FILES += \
-    frameworks/native/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml
+	frameworks/native/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml
 
 PRODUCT_PACKAGES += \
 	camera.deb
 
 #NFC
 PRODUCT_PACKAGES += \
-    nfc_nci.bcm2079x.default
+	nfc_nci.bcm2079x.default
+
+# F2FS
+PRODUCT_PACKAGES += \
+	mkfs.f2fs \
+	fsck.f2fs \
+	fibmap.f2fs
 
 # Do not power down SIM card when modem is sent to Low Power Mode.
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -48,6 +55,6 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
 $(call inherit-product, device/asus/flo/device-common.mk)
 
 # inherit from the non-open-source side, if present
-$(call inherit-product-if-exists, vendor/asus/deb/device-vendor.mk)
+#$(call inherit-product-if-exists, vendor/asus/deb/device-vendor.mk)
 
 DEVICE_PACKAGE_OVERLAYS := device/asus/deb/overlay
