@@ -1,4 +1,3 @@
-
 # Boot animation
 TARGET_SCREEN_HEIGHT := 1920
 TARGET_SCREEN_WIDTH := 1200
@@ -27,3 +26,14 @@ PRODUCT_BUILD_PROP_OVERRIDES += \
     PRODUCT_NAME=razorg \
     BUILD_FINGERPRINT=google/razorg/deb:5.1.1/LMY48P/2170233:user/release-keys \
     PRIVATE_BUILD_DESC="razorg-user 5.1.1 LMY48P 2170233 release-keys"
+
+# RR Opti
+TARGET_ARCH := arm
+TARGET_CPU_VARIANT := krait
+TARGET_TC_ROM := 4.9
+TARGET_TC_KERNEL := 4.9
+RR_STRICT := true
+RR_GRAPHITE := true
+RR_KRAIT := true
+RROPTI := true
+RR_PIPE := true
