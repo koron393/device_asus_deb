@@ -37,3 +37,4 @@ RR_GRAPHITE := true
 RR_KRAIT := true
 RROPTI := true
 RR_PIPE := true
+RR_O3 := true
