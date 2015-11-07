@@ -6,5 +6,5 @@ SYSTEM_F2FS=$?
 if [ $SYSTEM_F2FS -eq 0 ]; then
   mkfs.f2fs /dev/block/platform/msm_sdcc.1/by-name/system
 elif [ $SYSTEM_F2FS != 0 ]; then
-   mke2fs -t ext4 /dev/block/platform/msm_sdcc.1/by-name/system
+  mke2fs -t ext4 /dev/block/platform/msm_sdcc.1/by-name/system
 fi

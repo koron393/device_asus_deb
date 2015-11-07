@@ -30,8 +30,10 @@ PRODUCT_BUILD_PROP_OVERRIDES += \
 # RR Opti
 TARGET_ARCH := arm
 TARGET_CPU_VARIANT := krait
-TARGET_TC_ROM := 4.9
-TARGET_TC_KERNEL := 4.9
+TARGET_TOOLS_PREFIX=prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9-cortex-a15/bin/arm-linux-androideabi-
+TARGET_TOOLCHAIN_ROOT := prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9-cortex-a15
+TARGET_TC_ROM := 4.9-cortex-a15
+TARGET_TC_KERNEL := 4.9-cortex-a15
 RR_STRICT := true
 RR_GRAPHITE := true
 RR_KRAIT := true
