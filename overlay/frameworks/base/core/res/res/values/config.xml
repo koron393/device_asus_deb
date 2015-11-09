@@ -187,7 +187,7 @@
     </string-array>
 
     <!-- This device is not "voice capable"; it's data-only. -->
-    <bool name="config_voice_capable">false</bool>
+    <bool name="config_voice_capable">true</bool>
 
     <!-- This device does not allow sms service. -->
     <bool name="config_sms_capable">true</bool>
@@ -276,5 +276,12 @@
          For example, a device with Home, Back and Menu keys would set this
          config to 7. -->
     <integer name="config_deviceHardwareKeys">0</integer>
+
+    <!-- If this value is true, Sms encoded as octet is decoded by utf8 decoder.
+         If false, decoded by Latin decoder. -->
+    <bool name="config_sms_utf8_support">true</bool>
+
+    <!-- Enable lockscreen translucent decor by default -->
+    <bool name="config_enableLockScreenTranslucentDecor">true</bool>
 
 </resources>

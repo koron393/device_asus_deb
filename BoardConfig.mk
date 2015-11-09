@@ -25,6 +25,9 @@ BOARD_HAL_STATIC_LIBRARIES := libdumpstate.deb
 TARGET_RELEASETOOLS_EXTENSIONS := device/asus/deb
 
 TARGET_RECOVERY_FSTAB = device/asus/deb/recovery.fstab
+TARGET_RECOVERY_INITRC = device/asus/deb/recovery/init.rc
+
+TARGET_USERIMAGES_USE_F2FS := true
 
 -include vendor/asus/deb/BoardConfigVendor.mk
 include device/asus/flo/BoardConfigCommon.mk

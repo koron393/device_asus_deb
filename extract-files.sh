@@ -32,7 +32,8 @@ for FILE in `cat proprietary-blobs.txt | grep -v ^# | grep -v ^$ | sed -e 's#^/s
     if [ "$SRC" = "adb" ]; then
       adb pull /system/$FILE $BASE/$FILE
     else
-      cp $SRC/system/$FILE $BASE/$FILE
+      #cp $SRC/system/$FILE $BASE/$FILE
+      cp $SRC/$FILE $BASE/$FILE
     fi
 
 done

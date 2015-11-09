@@ -16,15 +16,17 @@
 
 # rild
 PRODUCT_PACKAGES := \
+    Dialer \
     rild \
     BasicSmsReceiver
 
 PRODUCT_COPY_FILES := \
     device/asus/deb/fstab.deb:root/fstab.flo \
-    device/asus/deb/init.deb.rc:root/init.flo.rc
+    device/asus/deb/init.deb.rc:root/init.flo.rc \
+    device/asus/deb/twrp.fstab:recovery/root/etc/twrp.fstab
 
 PRODUCT_PACKAGES += \
-	camera.deb
+    camera.deb
 
 #NFC
 PRODUCT_PACKAGES += \
@@ -32,14 +34,19 @@ PRODUCT_PACKAGES += \
 
 # Do not power down SIM card when modem is sent to Low Power Mode.
 PRODUCT_PROPERTY_OVERRIDES += \
-        persist.radio.apm_sim_not_pwdn=1
+    persist.radio.apm_sim_not_pwdn=1
 
 #Stop rild if non 3G SKU
 PRODUCT_PACKAGES += \
-        init.qcom.class_main.sh
+    init.qcom.class_main.sh
+
+PRODUCT_PACKAGES += \
+    mkfs.f2fs \
+    fsck.f2fs \
+    fibmap.f2fs
 
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
-        rild.libpath=/system/lib/libril-qc-qmi-1.so
+    rild.libpath=/system/lib/libril-qc-qmi-1.so
 
 # the actual meat of the device-specific product definition
 $(call inherit-product, device/asus/flo/device-common.mk)

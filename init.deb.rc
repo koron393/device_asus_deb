@@ -241,7 +241,7 @@ on post-fs-data
     write /sys/module/rpm_resources/enable_low_power/pxo 1
     write /sys/module/rpm_resources/enable_low_power/vdd_dig 1
     write /sys/module/rpm_resources/enable_low_power/vdd_mem 1
-    write /sys/module/pm_8x60/modes/cpu0/retention/idle_enabled 1
+    write /sys/module/pm_8x60/modes/cpu0/retention/idle_enabled 0
     write /sys/module/pm_8x60/modes/cpu1/retention/idle_enabled 1
     write /sys/module/pm_8x60/modes/cpu2/retention/idle_enabled 1
     write /sys/module/pm_8x60/modes/cpu3/retention/idle_enabled 1
@@ -280,6 +280,14 @@ on post-fs-data
     write /sys/devices/system/cpu/cpu2/online 1
     write /sys/devices/system/cpu/cpu3/online 1
     write /dev/cpuctl/apps/cpu.notify_on_migrate 1
+
+    # Enable S2W/S2S/DT2W
+    write /sys/android_touch/sweep2wake 1
+    write /sys/android_touch/shortsweep 1
+    write /sys/android_touch/doubletap2wake 1
+
+    # OTG+Charge hack (default disable)
+    write /sys/module/msm_otg/parameters/usbhost_charge_mode N
 
 on charger
     # Enable Power modes and set the CPU Freq Sampling rates
