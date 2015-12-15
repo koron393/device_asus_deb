@@ -1,0 +1,8 @@
+[
+ {
+   "remote": "github",
+   "repository": "koron393/device_asus_flo",
+   "target_path": "device/asus/flo",
+   "revision": "mm6.0"
+ }
+]
